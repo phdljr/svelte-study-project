@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { writable, get } from "svelte/store";
-import { getApi, postApi, putApi, deleteApi } from "../service/api";
+import { writable, get, derived } from "svelte/store";
+import { getApi, postApi, putApi, delApi } from "../service/api";
 import { router } from "tinro";
 
 function setCurrentAtriclesPage() { }
@@ -20,6 +20,9 @@ function setAuth() {
     const { subscribe, set, update } = writable({ ...initValues });
 
     // 서버 호출 메소드는 기본적으로 비동기 호출을 사용
+    // refresh 토큰을 이용해 access_token을 요청하는 메소드
+    // 코드상으론 보이지 않지만, 클라이언트의 브라우저에 refresh_token이 저장되어 있음
+    // 서버는 이를 읽어들여 처리
     const refresh = async () => {
         try {
             const authenticationUser = await postApi({ path: "/auth/refresh" });
@@ -32,31 +35,31 @@ function setAuth() {
         }
     }
     const resetUserInfo = () => set({ ...initValues });
-    const login = async (email, pwd) => {
+    const login = async (email, password) => {
         try {
             const options = {
                 path: "/auth/login",
                 data: {
                     email: email,
-                    pwd: pwd,
+                    pwd: password,
                 }
-            }
+            };
             const result = await postApi(options);
-
             set(result);
             isRefresh.set(true);
-            router.goto('/articles');
-        } catch (error) {
-            alert("오류가 발생했습니다. 로그인을 다시 시도해주세요");
+            router.goto('/');
         }
-    };
+        catch (error) {
+            alert('오류가 발생했습니다. 로그인을 다시시도해 주세요.')
+        }
+    }
     const logout = async () => {
         try {
             const options = {
                 path: "/auth/logout",
             }
 
-            await deleteApi(options);
+            await delApi(options);
             set({ ...initValues });
             isRefresh.set(false);
             router.goto("/");
@@ -92,7 +95,11 @@ function setAuth() {
     }
 }
 function setArticlesMode() { }
-function setIsLogin() { }
+function setIsLogin() {
+    // const checkLogin = derived(auth, $auth => $auth.Authorization ? true : false)
+    const checkLogin = derived(auth, $auth => $auth.Authorization ? true : false);
+    return checkLogin;
+}
 
 export const currentAtriclesPage = setCurrentAtriclesPage();
 export const articles = setArticles();

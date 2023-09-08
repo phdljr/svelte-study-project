@@ -25,7 +25,7 @@ const send = async ({ method = "", path = "", data = {}, access_token = "" } = {
 
     try {
         const response = await axios(options);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -43,7 +43,7 @@ const putApi = ({ path = "", data = {}, access_token = "" } = {}) => {
     return send({ method: "PUT", path, data, access_token });
 }
 
-const deleteApi = ({ path = "", data = {}, access_token = "" } = {}) => {
+const delApi = ({ path = "", data = {}, access_token = "" } = {}) => {
     return send({ method: "DELETE", path, data, access_token });
 }
 
@@ -51,5 +51,5 @@ export {
     getApi,
     postApi,
     putApi,
-    deleteApi
+    delApi
 }

@@ -1,8 +1,23 @@
+<script>
+  import { router, meta } from "tinro";
+
+  const route = meta();
+  const url = $route.url;
+</script>
+
 <header class="main-header">
   <p class="p-main-title">SLogs</p>
   <nav class="main-nav">
-    <a href="/login" class=" main-menu mr-6">로그인</a>
-    <a href="/register" class="main-menu mr-6">회원가입</a>
+    <a
+      href="/login"
+      class=" main-menu mr-6"
+      class:main-menu-selected={url === "/login"}>로그인</a
+    >
+    <a
+      href="/register"
+      class="main-menu mr-6"
+      class:main-menu-selected={url === "/register"}>회원가입</a
+    >
   </nav>
   <a href="/" class="text-white">
     <svg
