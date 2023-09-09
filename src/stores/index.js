@@ -28,8 +28,8 @@ function setArticles() {
     let initValues = {
         articleList: [],
         totalPageCount: 0,
-        menuPopup: "",
-        editMode: "",
+        menuPopup: "", // 메뉴창을 띄울 하나의 articleId를 저장
+        editMode: "", // 수정 모드를 띄울 하나의 articleId를 저장
     };
 
     const { subscribe, update, set } = writable({ ...initValues });
@@ -88,10 +88,133 @@ function setArticles() {
         articlePageLock.set(false);
     };
 
+    const addArticle = async (content) => {
+        // 로그인한 사람만 보낼 수 있도록
+        const access_token = get(auth).Authorization;
+
+        try {
+            const options = {
+                path: "/articles",
+                data: {
+                    content: content,
+                },
+                access_token: access_token,
+            };
+
+            const newArticle = await postApi(options);
+
+            // 기존 목록 앞에 새 글 추가
+            // 추가된 부분만을 스토어에 적용 시, 전체가 아닌 변화가 있는 부분만을 수정할 수 있음
+            update(datas => {
+                datas.articleList = [newArticle, ...datas.articleList];
+                return datas;
+            })
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    const openMenuPopup = (id) => {
+        update(datas => {
+            datas.menuPopup = id;
+            return datas;
+        })
+    }
+
+    const closeMenuPopup = () => {
+        update(datas => {
+            datas.menuPopup = "";
+            return datas;
+        })
+    }
+
+    const openEditModeArticle = (id) => {
+        // 열려있는 팝업 메뉴 닫기
+        articles.closeMenuPopup();
+
+        update(datas => {
+            datas.editMode = id;
+            return datas;
+        })
+    }
+
+    const closeEditModeArticle = () => {
+        update(datas => {
+            datas.editMode = "";
+            return datas;
+        })
+    }
+
+    const updateArticle = async (article) => {
+        const access_token = get(auth).Authorization;
+
+        try {
+            const updateData = {
+                articleId: article.id,
+                content: article.content,
+            };
+
+            const options = {
+                path: "/articles",
+                data: updateData,
+                access_token: access_token,
+            };
+
+            const updateArticle = await putApi(options);
+
+            update(datas => {
+                // 수정한 article을 찾아서 내용을 바꾸는 작업
+                const newArticleList = datas.articleList.map(article => {
+                    if (article.id === updateArticle.id) {
+                        article = updateArticle;
+                    }
+                    return article;
+                })
+                datas.articleList = newArticleList;
+                return datas;
+            });
+
+            articles.closeEditModeArticle();
+            alert("수정이 완료되었습니다.");
+        } catch (error) {
+            alert("수정에 오류가 발생했습니다. 다시 시도해 주세요.");
+        }
+    }
+
+    const deleteArticle = async (id) => {
+        const access_token = get(auth).Authorization;
+
+        try {
+            const options = {
+                path: `/articles/${id}`,
+                access_token: access_token,
+            };
+
+            await delApi(options);
+
+            update(datas => {
+                // 삭제한 article의 id와 같지 않은 것만 선별
+                const newArticleList = datas.articleList.filter(article => article.id !== id);
+                datas.articleList = newArticleList;
+                return datas;
+            });
+            alert("삭제가 완료되었습니다.");
+        } catch (error) {
+            alert("삭제 중 오류가 발생했습니다.");
+        }
+    }
+
     return {
         subscribe,
         fetchArticles,
         resetArticles,
+        addArticle,
+        openMenuPopup,
+        closeMenuPopup,
+        openEditModeArticle,
+        closeEditModeArticle,
+        updateArticle,
+        deleteArticle,
     }
 }
 function setLoadingArticle() {
