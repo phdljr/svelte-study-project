@@ -204,6 +204,34 @@ function setArticles() {
         }
     }
 
+    // 댓글 작성 시, 댓글 개수 추가
+    const increArticleCommentCount = (articleId) => {
+        update(datas => {
+            const newArticleList = datas.articleList.map(article => {
+                if (article.id === articleId) {
+                    article.commentCount = article.commentCount + 1;
+                }
+                return article;
+            })
+            datas.articleList = newArticleList;
+            return datas;
+        })
+    };
+
+    // 댓글 작성 시, 댓글 개수 감소
+    const decreArticleCommentCount = (articleId) => {
+        update(datas => {
+            const newArticleList = datas.articleList.map(article => {
+                if (article.id === articleId) {
+                    article.commentCount = article.commentCount - 1;
+                }
+                return article;
+            })
+            datas.articleList = newArticleList;
+            return datas;
+        })
+    };
+
     return {
         subscribe,
         fetchArticles,
@@ -215,7 +243,9 @@ function setArticles() {
         closeEditModeArticle,
         updateArticle,
         deleteArticle,
-    }
+        increArticleCommentCount,
+        decreArticleCommentCount,
+    };
 }
 function setLoadingArticle() {
     const { subscribe, set } = writable(false);
@@ -238,8 +268,102 @@ function setLoadingArticle() {
         turnOffLoading,
     }
 }
-function setAtricleContent() { }
-function setComments() { }
+function setAtricleContent() {
+    let initValues = {
+        id: "",
+        userId: "",
+        userEmail: "",
+        content: "",
+        createdAt: "",
+        commentCount: 0,
+        likeCount: 0,
+        likeUsers: [],
+    };
+
+    const { subscribe, set } = writable({ ...initValues });
+
+    const getArticle = async (id) => {
+        try {
+            const options = {
+                path: `/articles/${id}`,
+            }
+
+            const getData = await getApi(options);
+            set(getData);
+        } catch (error) {
+            alert("오류가 발생했습니다. 다시 시도해 주세요.");
+        }
+    }
+
+    return {
+        subscribe,
+        getArticle,
+    }
+}
+function setComments() {
+    const { subscribe, update, set } = writable([]);
+
+    const fetchComments = async (articleId) => {
+        try {
+            const options = {
+                path: `/comments/${articleId}`
+            };
+
+            const getDatas = await getApi(options);
+            set(getDatas.comments);
+        } catch (error) {
+            alert("오류가 발생했습니다. 다시 시도해 주세요.");
+        }
+    };
+    const addComment = async (articleId, commentContent) => {
+        const access_token = get(auth).Authorization;
+
+        try {
+            const options = {
+                path: '/comments',
+                data: {
+                    articleId: articleId,
+                    content: commentContent,
+                },
+                access_token: access_token,
+            };
+
+            const newData = await postApi(options);
+            update(datas => [...datas, newData]);
+            articles.increArticleCommentCount(articleId);
+        } catch (error) {
+            alert("오류가 발생했습니다. 다시 시도해 주세요.");
+        }
+    };
+    const deleteComment = async (commentId, articleId) => {
+        const access_token = get(auth).Authorization;
+
+        try {
+            const options = {
+                path: "/comments",
+                data: {
+                    commentId: commentId,
+                    articleId: articleId,
+                },
+                access_token: access_token,
+            };
+
+            await delApi(options);
+            update(datas => datas.filter(comment => comment.id !== commentId));
+            articles.decreArticleCommentCount(articleId);
+            alert("댓글이 삭제되었습니다.");
+        } catch (error) {
+            alert("오류가 발생했습니다. 다시 시도해 주세요.");
+        }
+    };
+
+    return {
+        subscribe,
+        fetchComments,
+        addComment,
+        deleteComment,
+    }
+}
 function setAuth() {
     let initValues = {
         id: "",

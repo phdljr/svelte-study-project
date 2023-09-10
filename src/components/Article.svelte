@@ -36,7 +36,9 @@
     }
   };
 
-  const goComment = (id) => {};
+  const goComment = (id) => {
+    router.goto(`/articles/comments/${id}`);
+  };
 </script>
 
 {#if $articles.editMode === article.id}
@@ -112,7 +114,7 @@
         </button> -->
       </div>
       <div class="button-box-inner-right">
-        <button class="flex">
+        <button class="flex" on:click={() => goComment(article.id)}>
           <p class="text-base">{article.commentCount}</p>
           <svg
             xmlns="http://www.w3.org/2000/svg"
