@@ -2,6 +2,7 @@
   export let article;
   import { articles, auth } from "../stores";
   import ArticleEditForm from "./ArticleEditForm.svelte";
+  import { router } from "tinro";
 
   // 현재
   // $articles.menuPopup값과 porps로 받은 article.id값이 같을 때 true가 돼야 함
@@ -16,6 +17,7 @@
     }
   }
 
+  // 메뉴 버튼 토글 함수
   const onToggleMenuPopup = (id) => {
     if (isViewMenu === true) {
       articles.closeMenuPopup();
@@ -33,6 +35,8 @@
       articles.deleteArticle(id);
     }
   };
+
+  const goComment = (id) => {};
 </script>
 
 {#if $articles.editMode === article.id}

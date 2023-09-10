@@ -11,10 +11,12 @@
     content: article.content,
   };
 
+  // 취소 버튼을 눌렀을 때
   const onCloseEditModeArticle = () => {
     articles.closeEditModeArticle();
   };
 
+  // 완료 버튼을 눌렀을 때
   const onUpdateArticle = () => {
     articles.updateArticle(articleValue);
   };
