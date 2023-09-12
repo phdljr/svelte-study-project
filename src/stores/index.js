@@ -2,6 +2,7 @@
 import { writable, get, derived } from "svelte/store";
 import { getApi, postApi, putApi, delApi } from "../service/api";
 import { router } from "tinro";
+import { ALL, MY, LIKE } from "../utils/constant";
 
 // 무한 스크롤 기반 페이지네이션
 function setCurrentArticlesPage() {
@@ -41,7 +42,24 @@ function setArticles() {
         // get(): 다른 스토어 또는 일반 js 파일에서 스벨트의 스토어값을 가져오는 함수
         // $ 기호는 js 파일에선 사용하지 못한다.
         const currentPage = get(currentArticlesPage);
-        let path = `/articles/?pageNumber=${currentPage}`;
+        // let path = `/articles/?pageNumber=${currentPage}`;
+        let path = "";
+        const mode = get(articlesMode);
+
+        switch (mode) {
+            case ALL:
+                path = `/articles/?pageNumber=${currentPage}`;
+                break;
+            case LIKE:
+                path = `/likes/?pageNumber=${currentPage}`;
+                break;
+            case MY:
+                path = `/articles/?pageNumber=${currentPage}&mode=${mode}`;
+                break;
+            default:
+                path = `/articles/${currentPage}`;
+                break;
+        }
 
         try {
             // $ 기호는 js 파일에선 사용하지 못한다. 그래서 get을 통해 가져온다.
@@ -478,7 +496,8 @@ function setAuth() {
             await delApi(options);
             set({ ...initValues });
             isRefresh.set(false);
-            router.goto("/");
+            // router.goto("/");
+            articlesMode.changeMode(ALL);
         } catch (error) {
             alert("오류가 발생했습니다. 다시 시도해주세요");
         }
@@ -510,7 +529,21 @@ function setAuth() {
         register,
     }
 }
-function setArticlesMode() { }
+function setArticlesMode() {
+    const { subscribe, update, set } = writable(ALL);
+
+    // 모드가 바뀌면 상황에 맞는 글을 불러옴
+    const changeMode = async (mode) => {
+        set(mode);
+        articles.resetArticles();
+        await articles.fetchArticles();
+    }
+
+    return {
+        subscribe,
+        changeMode,
+    }
+}
 function setIsLogin() {
     const checkLogin = derived(auth, $auth => $auth.Authorization ? true : false);
     return checkLogin;

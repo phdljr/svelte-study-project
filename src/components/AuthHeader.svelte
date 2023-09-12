@@ -1,5 +1,5 @@
 <script>
-  import { router, meta } from "tinro";
+  import { meta } from "tinro";
 
   const route = meta();
   const url = $route.url;
