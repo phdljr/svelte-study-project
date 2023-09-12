@@ -9,7 +9,8 @@
   const onChangeMode = (mode) => {
     // 전달된 모드 값이 현재 값이랑 같다면, 굳이 다시 안보내도 됨
     if ($articlesMode !== mode) {
-      articlesMode.changeMode(mode);
+      // articlesMode.changeMode(mode);
+      router.goto(`/articles/${mode}`);
     }
   };
 </script>

@@ -9,6 +9,8 @@
   // $articles.menuPopup값과 porps로 받은 article.id값이 같을 때 true가 돼야 함
   let isViewMenu = false;
 
+  const currentMode = $router.path.split("/")[2];
+
   // 상태값들의 변화를 감지하기 위한 반응성 블록
   $: {
     if ($articles.menuPopup === article.id) {
@@ -38,7 +40,8 @@
   };
 
   const goComment = (id) => {
-    router.goto(`/articles/comments/${id}`);
+    // router.goto(`/articles/comments/${id}`);
+    router.goto(`/articles/${currentMode}/comments/${id}`);
   };
 
   const onLike = (id) => {
