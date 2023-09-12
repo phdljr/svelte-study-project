@@ -84,7 +84,12 @@ function setArticles() {
                     datas.totalPageCount = newData.totalPageCount;
                 } else { // 첫 페이지가 아니라면, 스프레드를 시켜 이전 데이터에 연결시킨다.
                     const newArticles = [...datas.articleList, ...newData.articleList];
-                    datas.articleList = newArticles;
+                    // datas.articleList = newArticles;
+                    // 중복되는 게시글을 필터하는 코드
+                    // value: newArticles의 원소, index: 인덱스, array: newArticles 배열
+                    // findIndex는 조건에 만족하는 첫번째 값만 리턴한다.
+                    const uniqueArr = newArticles.filter((value, index, array) => index === array.findIndex(t => t.id === value.id));
+                    datas.articleList = uniqueArr;
                     datas.totalPageCount = newData.totalPageCount;
                 }
 
