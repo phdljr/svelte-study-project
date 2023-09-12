@@ -3,6 +3,10 @@
   import { onMount } from "svelte";
   import { router, meta } from "tinro";
   import { articleContent, comments, isLogin } from "../stores";
+  import { contentValidate, extractErrors } from "../utils/validates";
+  import dateView from "../utils/date";
+
+  let errors = {};
 
   const route = meta();
   const articleId = Number(route.params.id);
@@ -20,8 +24,14 @@
   const goArticles = () => router.goto(`/articles`);
 
   const onAddComment = async () => {
-    await comments.addComment(articleId, values.formContent);
-    values.formContent = "";
+    try {
+      await contentValidate.validate(values, { abortEarly: false });
+      await comments.addComment(articleId, values.formContent);
+      values.formContent = "";
+    } catch (error) {
+      errors = extractErrors(error);
+      if (errors.formContent) alert(errors.formContent);
+    }
   };
 </script>
 
@@ -30,7 +40,7 @@
     <div class="comment-box-header">
       <div class="content-box-header-inner-left">
         <p class="p-user">{$articleContent.userEmail}</p>
-        <p class="p-date">{$articleContent.createdAt}</p>
+        <p class="p-date">{dateView($articleContent.createdAt)}</p>
       </div>
     </div>
 

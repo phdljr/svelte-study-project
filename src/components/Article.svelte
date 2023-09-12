@@ -3,6 +3,7 @@
   import { articles, auth, isLogin } from "../stores";
   import ArticleEditForm from "./ArticleEditForm.svelte";
   import { router } from "tinro";
+  import dateView from "../utils/date";
 
   // 현재
   // $articles.menuPopup값과 porps로 받은 article.id값이 같을 때 true가 돼야 함
@@ -60,7 +61,7 @@
     <div class="content-box-header">
       <div class="content-box-header-inner-left">
         <p class="p-user">{article.userEmail}</p>
-        <p class="p-date">{article.createdAt}</p>
+        <p class="p-date">{dateView(article.createdAt)}</p>
       </div>
       <div class="content-box-header-inner-right">
         <!-- 해당 유저의 게시글인지 식별하는 부분 -->
